@@ -1,0 +1,85 @@
+	---------------------------------------------------------d:\\userss.json
+  {
+	"retCode":"0000",
+	"retMsg":"成功", 
+	"keyCurVerList": [{
+	"issueChannelCode":"01",
+	"keyId":"01",
+	"keyBathNumber":"2",
+	"needUpdateYN":"Y",
+	"keyList":
+	[
+	{"keyBathNumber":"2","keyIdx":"01","keyValue":"1111111111","keyEffectiveDate":"20271101"},
+	{"keyBathNumber":"2","keyIdx":"02","keyValue":"2222222222","keyEffectiveDate":"20271101"},
+	{"keyBathNumber":"2","keyIdx":"03","keyValue":"3333333333","keyEffectiveDate":"20271101"},
+	{"keyBathNumber":"2","keyIdx":"04","keyValue":"4444444444","keyEffectiveDate":"20271101"},
+	{"keyBathNumber":"2","keyIdx":"05","keyValue":"5555555555","keyEffectiveDate":"20271101"},
+	{"keyBathNumber":"2","keyIdx":"06","keyValue":"6666666666","keyEffectiveDate":"20271101"},
+	{"keyBathNumber":"2","keyIdx":"07","keyValue":"7777777777","keyEffectiveDate":"20271101"},
+	{"keyBathNumber":"2","keyIdx":"08","keyValue":"8888888888","keyEffectiveDate":"20271101"},
+	{"keyBathNumber":"2","keyIdx":"09","keyValue":"9999999999","keyEffectiveDate":"20271101"},
+	{"keyBathNumber":"2","keyIdx":"0A","keyValue":"AAAAAAAAAA","keyEffectiveDate":"20271101"}
+	]
+}]
+}
+  ---------------------------------------------------------.cpp
+  // 根据要解析的数据定义相对应的结构体
+	struct ST_Key
+	{
+		std::string keyBathNumber;
+		std::string keyIdx;
+		std::string keyValue;
+		std::string keyEffectiveDate;
+	};
+	struct ST_KeyCurVer
+	{
+		std::string issueChannelCode;
+		std::string keyId;
+		std::string keyBathNumber;
+		std::string needUpdateYN;
+		std::vector<ST_Key> keyList;
+	};
+	struct ST_KeySync_Ret
+	{
+		std::string retCode;
+		std::string retMsg;
+		std::vector<ST_KeyCurVer> keyCurVerList;
+	};
+	// 使用方法
+	// 接收到要解析的json内容存储在 string revc_text 中
+	Json::Reader reader;
+	Json::Value value;
+	ST_KeySync_Ret	ret;
+	if (reader.parse(("d:\\userss.json"), value, false))  //revc_text要解析的json文本
+	{
+		ret.retCode = value["retCode"].asString(); 
+		//ST_KeySync_Ret ret为本地要存储json数据定义的结构体
+		ret.retMsg = value["retMsg"].asString();
+
+		const Json::Value arrayObj = value["keyCurVerList"];
+		for (int i = 0; i < arrayObj.size(); ++i)
+		{
+			ST_KeyCurVer keyCurVer; //自定义的结构体
+
+			keyCurVer.issueChannelCode = arrayObj[i]["issueChannelCode"].asString();
+			keyCurVer.keyId = arrayObj[i]["keyId"].asString();
+			keyCurVer.keyBathNumber = arrayObj[i]["keyBathNumber"].asString();
+			keyCurVer.needUpdateYN = arrayObj[i]["needUpdateYN"].asString();
+
+			const Json::Value subArrayObj = arrayObj[i]["keyList"];
+			for (int j = 0; j < subArrayObj.size(); ++j)
+			{
+				ST_Key key; //自定义的结构体
+
+				key.keyBathNumber = subArrayObj[j]["keyBathNumber"].asString();
+				key.keyIdx = subArrayObj[j]["keyIdx"].asString();
+				key.keyValue = subArrayObj[j]["keyValue"].asString();
+				key.keyEffectiveDate = subArrayObj[j]["keyEffectiveDate"].asString();
+
+				keyCurVer.keyList.push_back(key);
+			}
+			ret.keyCurVerList.push_back(keyCurVer);
+		}
+	}
+  ---------------------------------------------------------改进建议
+  1.struct改为class形式，并重载'<<'
